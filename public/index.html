@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- --- BLOQUE 1: Configuración Inicial, Metadatos y Vinculación de Estilos --- -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema POS - Control de Salidas e-commerce</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- --- BLOQUE 2: Contenedor Global de Notificaciones Flotantes (Toasts) --- -->
+    <div id="toast-container"></div>
+
+    <!-- --- BLOQUE 3: Vista de Inicio de Sesión (Login) --- -->
+    <div id="vista-login" class="pantalla">
+        <div class="login-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; gap: 6px; background: rgba(220, 252, 231, 0.8); padding: 4px 10px; border-radius: 20px; border: 1px solid #bbf7d0;">
+                    <span style="width: 8px; height: 8px; background: #16a34a; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #16a34a;"></span>
+                    <span style="font-size: 11px; font-weight: 600; color: #166534;">DB Activa</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; background: rgba(224, 242, 254, 0.8); padding: 4px 10px; border-radius: 20px; border: 1px solid #bae6fd;">
+                    <span style="font-size: 11px; font-weight: 600; color: #0369a1;">🔒 E-commerce Logística v3.2</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #4f46e5, #3b82f6); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 12px auto; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);">📦</div>
+                <h2 style="color: var(--text-main); margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;">Control de Salidas</h2>
+                <p style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">Selecciona tu cuenta o inicia sesión</p>
+            </div>
+            
+            <form id="form-login" onsubmit="autenticarUsuario(event)">
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-label); text-transform: uppercase; letter-spacing: 0.5px;">Usuario:</label>
+                    <select id="login-select-usuario" onchange="seleccionarUsuarioLogin(this)" style="width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 10px; background: var(--input-bg); color: var(--text-main); font-size: 14px; font-weight: 500; outline: none;">
+                        <option value="">-- Seleccione un usuario --</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 16px; display: none;" id="contenedor-input-usuario">
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-label); text-transform: uppercase; letter-spacing: 0.5px;">Usuario:</label>
+                    <input type="text" id="login-usuario" placeholder="Ej. admin" style="width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; background: var(--input-bg); color: var(--text-main); outline: none;">
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--text-label); text-transform: uppercase; letter-spacing: 0.5px;">Contraseña:</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" style="width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; background: var(--input-bg); color: var(--text-main); outline: none;">
+                </div>
+                <button type="submit" id="btn-login" class="action-btn" style="width: 100%; padding: 14px; font-size: 15px; border-radius: 10px; margin-bottom: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);">Entrar al Sistema</button>
+            </form>
+            <button onclick="abrirModalRegistroDesdeLogin()" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 13px; width: 100%; text-align: center; font-weight: 600; padding: 6px;">➕ Registrar nuevo usuario</button>
+        </div>
+    </div>
+
+    <!-- --- BLOQUE 4: Modal Flotante de Registro de Nuevos Usuarios --- -->
+    <div id="modal-registro-usuario" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1200;">
+        <div style="background: var(--card-bg); width: 420px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); overflow: hidden; border: 1px solid var(--border-color);">
+            <div style="background: var(--primary); color: white; padding: 15px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                <span>👤 Registrar Nuevo Usuario (Máx. 10)</span>
+                <button onclick="cerrarModalRegistro()" style="background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer; font-weight: bold;">✕</button>
+            </div>
+            <div style="padding: 24px;">
+                <form id="form-nuevo-usuario" onsubmit="registrarNuevoUsuario(event)">
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--text-label);">Nombre de Usuario:</label>
+                        <input type="text" id="nuevo-usu-user" required placeholder="ej. operador1" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; background: var(--input-bg); color: var(--text-main);">
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--text-label);">Nombre Completo / Área:</label>
+                        <input type="text" id="nuevo-usu-nombre" required placeholder="ej. Ana Gómez (Logística)" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; background: var(--input-bg); color: var(--text-main);">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--text-label);">Contraseña:</label>
+                        <input type="password" id="nuevo-usu-pass" required placeholder="••••••••" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; background: var(--input-bg); color: var(--text-main);">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="action-btn" style="flex: 1; background: #16a34a; padding: 10px;">Guardar Usuario</button>
+                        <button type="button" onclick="cerrarModalRegistro()" style="background: #475569; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600;">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- SISTEMA PRINCIPAL --- -->
+    <div id="sistema-principal" class="pantalla oculto">
+
+        <!-- --- BLOQUE 5: Cabecera (Header) y Menú de Usuario --- -->
+        <header>
+            <div>
+                <h1 style="color: var(--primary);">📦 Control de Salidas e-commerce</h1>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500;">
+                    <span id="fecha-actual"></span> - <span id="hora-actual" style="font-weight: bold; font-family: monospace;"></span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button type="button" onclick="alternarModoOscuro()" title="Cambiar tema claro/oscuro" style="background: var(--table-bg); border: 1px solid var(--border-color); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                    <span id="icono-modo-tema">🌙</span>
+                </button>
+
+                <div class="user-badge-container" onclick="toggleMenuUsuario(event)">
+                    <div class="user-badge">
+                        <div class="user-avatar" id="avatar-inicial">A</div>
+                        <div class="user-info">
+                            <span>Usuario activo</span>
+                            <strong id="nombre-usuario">Administrador (Logística)</strong>
+                        </div>
+                        <span style="font-size: 10px; color: var(--text-muted); margin-left: 5px;">▼</span>
+                    </div>
+                    <div id="user-menu" class="user-dropdown">
+                        <button onclick="abrirModalRegistroFromMenu()">➕ Agregar Nuevo Usuario</button>
+                        <button onclick="cambiarUsuarioModal()">🔄 Cambiar de Usuario</button>
+                        <button onclick="cerrarSesion()" style="color: #dc2626;">🚪 Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- --- BLOQUE 6: Barra de Navegación entre Vistas --- -->
+        <div class="nav-buttons" id="barra-navegacion">
+            <button class="nav-btn active" onclick="cambiarVista('ventas', this)">📦 Control Salidas</button>
+            <button class="nav-btn" onclick="cambiarVista('productos', this)">📦 Productos</button>
+            <button class="nav-btn" onclick="cambiarVista('inventario', this)">📦 Inventario</button>
+            <button class="nav-btn" id="btn-tab-admin" onclick="cambiarVista('admin-usuarios', this)" style="display: none; background: #e0e7ff; color: #4338ca; border-color: #c7d2fe;">👥 Admin. Usuarios</button>
+        </div>
+
+        <!-- --- BLOQUE 7: Vista 1 - Panel de Control de Salidas e-commerce --- -->
+        <div id="vista-ventas" class="view-section active">
+            <div class="card" style="padding: 15px;">
+                <!-- Buscador tipo Google con autocompletado en tiempo real -->
+                <div style="position: relative; margin-bottom: 15px;">
+                    <div style="background: var(--table-bg); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border-color);">
+                        <label style="font-weight: bold; color: var(--text-label); font-size: 15px; white-space: nowrap;">Código / SKU:</label>
+                        <input type="text" id="input-codigo-venta" oninput="buscarProductosTiempoReal(this.value)" placeholder="Escriba el nombre, código o SKU para buscar en tiempo real..." style="flex: 1; padding: 10px; font-size: 16px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);" autocomplete="off" autofocus>
+                        <button class="action-btn" onclick="agregarAlTicketSimulado()" style="background: #16a34a; padding: 10px 20px; font-size: 15px; white-space: nowrap;">✔ ENTER - Agregar</button>
+                    </div>
+                    <!-- Desplegable estilo Google -->
+                    <div id="sugerencias-salida-live" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 0 0 10px 10px; z-index: 1000; max-height: 320px; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.15);"></div>
+                </div>
+
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; min-height: 250px; overflow-x: auto; margin-bottom: 15px;">
+                    <table style="margin: 0; width: 100%;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border-color);">
+                                <th style="padding: 12px; text-align: center; width: 70px;">Miniatura</th>
+                                <th style="padding: 12px;">Código / SKU</th>
+                                <th style="padding: 12px;">Descripción</th>
+                                <th style="padding: 12px;">Precio Referencia</th>
+                                <th style="padding: 12px;">Cantidad a Sacar</th>
+                                <th style="padding: 12px; background: var(--table-bg); color: var(--text-label);">Subtotal</th>
+                                <th style="padding: 12px; text-align: center;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-ticket-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">La lista de salida está vacía. Escanee o agregue un artículo.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--table-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div>
+                        <span style="font-size: 14px; color: var(--text-muted);" id="contador-articulos">0 Artículos en la salida actual.</span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 30px;">
+                        <div style="text-align: right;">
+                            <span style="display: block; font-size: 12px; color: var(--text-muted);">Valor Total Ref.:</span>
+                            <span style="font-size: 32px; font-weight: bold; color: var(--primary);" id="total-ticket-txt">$0.00</span>
+                        </div>
+                        <button class="action-btn" onclick="registrarVenta()" style="background: #16a34a; font-size: 18px; padding: 15px 30px; box-shadow: 0 4px 6px rgba(22, 163, 74, 0.3);">
+                            📦 Registrar Salida de Inventario
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- BLOQUE 8: Vista 2 - Gestión de Productos --- -->
+        <div id="vista-productos" class="view-section">
+            <div class="card" style="border-top: 4px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
+                    <h3 style="margin: 0; border: none; color: var(--primary);">📦 GESTIÓN DE PRODUCTOS</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="sub-btn active" onclick="cambiarSubProducto('registrar', this)">➕ Registrar</button>
+                        <button class="sub-btn" onclick="cambiarSubProducto('buscar-actualizar', this)">🔍 Buscar / Editar</button>
+                        <button class="sub-btn" onclick="cambiarSubProducto('eliminar', this)">🗑️ Eliminar</button>
+                    </div>
+                </div>
+
+                <!-- Subsección Registrar -->
+                <div id="sub-registrar" class="sub-section active">
+                    <form id="form-producto" onsubmit="registrarProducto(event)">
+                        <div style="margin-bottom: 12px;">
+                            <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: bold; color: var(--text-label);">Código de Barras / SKU *:</label>
+                            <input type="text" id="codigo" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: bold; color: var(--text-label);">Descripción / Nombre del Producto:</label>
+                            <input type="text" id="nombre" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                        </div>
+
+                        <div style="margin-bottom: 14px; background: var(--table-bg); padding: 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <label style="font-size: 13px; font-weight: bold; color: var(--text-label); margin-right: 15px;">Se controla:</label>
+                            <label style="margin-right: 15px; font-size: 13px; cursor: pointer;"><input type="radio" name="tipo_venta" id="tipo-unidad" checked> Por Unidad/Pza</label>
+                            <label style="font-size: 13px; cursor: pointer;"><input type="radio" name="tipo_venta" id="tipo-granel"> A Granel (Usa Decimales)</label>
+                        </div>
+
+                        <div style="display: flex; gap: 15px; margin-bottom: 12px; align-items: flex-end;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: bold; color: var(--text-label);">Precio Costo ($):</label>
+                                <input type="number" step="0.01" id="precio_costo" value="0.00" oninput="calcularPrecioVentaDesdCosto()" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                            </div>
+                            <div style="width: 130px;">
+                                <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: bold; color: var(--text-label);">Ganancia (%):</label>
+                                <input type="number" step="0.01" id="ganancia" value="100" oninput="calcularPrecioVentaDesdCosto()" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; font-weight: bold; color: var(--primary); background: var(--input-bg);">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: bold; color: var(--text-label);">Precio Referencia ($):</label>
+                                <input type="number" step="0.01" id="precio_venta" required value="0.00" oninput="calcularGananciaDesdePrecioVenta()" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; font-weight: bold; background: var(--input-bg); color: var(--text-main);">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 12px; display: flex; gap: 10px; align-items: flex-end;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: bold; color: var(--text-label);">Departamento:</label>
+                                <select id="departamento" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                                    <option value="Sin Departamento">Sin Departamento</option>
+                                </select>
+                            </div>
+                            <button type="button" onclick="abrirModalDepartamentos()" class="action-btn" style="background: #475569; padding: 9px 12px; font-size: 12px;">🏢 Administrar Departamentos...</button>
+                        </div>
+
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: bold; color: var(--text-label);">Stock Inicial:</label>
+                                <input type="number" id="stock" min="0" required value="1" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: bold; color: var(--text-label);">Stock Mínimo:</label>
+                                <input type="number" id="stock_minimo" min="0" required value="1" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                            </div>
+                            <div style="flex: 1.5;">
+                                <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: bold; color: var(--text-label);">Imagen del Producto:</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="file" id="imagen-archivo" accept="image/*" onchange="manejarImagenLocal(this)" style="display: none;">
+                                    <button type="button" onclick="document.getElementById('imagen-archivo').click()" style="background: #0284c7; color: white; border: none; padding: 8px 10px; border-radius: 6px; font-size: 12px;">📁 Subir</button>
+                                    <input type="text" id="imagen-url" placeholder="O pega URL de internet..." style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 12px; background: var(--input-bg); color: var(--text-main);">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; margin-top: 20px;">
+                            <button type="submit" class="action-btn" style="flex: 2; background: #16a34a; padding: 12px;">✔ Registrar Producto</button>
+                            <button type="reset" class="action-btn" style="flex: 1; background: #dc2626; padding: 12px;">✖ Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Subsección Buscar/Editar -->
+                <div id="sub-buscar-actualizar" class="sub-section">
+                    <div style="position: relative; margin-bottom: 15px;">
+                        <label style="font-size: 13px; display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-label);">Búsqueda Automática:</label>
+                        <input type="text" id="input-busqueda-producto" oninput="ejecutarBusquedaAutomatica(this.value)" placeholder="Escriba para buscar..." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);" autocomplete="off">
+                        <div id="sugerencias-busqueda" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 0 0 8px 8px; z-index: 100; max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+
+                    <div id="contenedor-resultados-busqueda" style="display: none; background: var(--table-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h4 style="margin-top: 0; color: var(--primary);">✏️ Editar Producto</h4>
+                        <form id="form-actualizar" onsubmit="actualizarProducto(event)">
+                            <input type="hidden" id="act-codigo-original">
+                            <div style="margin-bottom: 12px;">
+                                <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-label);">Código / SKU:</label>
+                                <input type="text" id="act-codigo" required style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                                <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-label);">Nombre del Producto:</label>
+                                <input type="text" id="act-nombre" required style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                            </div>
+                            <div style="display: flex; gap: 12px; margin-bottom: 15px;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-label);">Precio Referencia ($):</label>
+                                    <input type="number" step="0.01" id="act-precio" required style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-label);">Precio Compra ($):</label>
+                                    <input type="number" step="0.01" id="act-compra" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                                </div>
+                            </div>
+                            <button type="submit" class="action-btn" style="background: #16a34a; width: 100%;">💾 Guardar Cambios</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Subsección Eliminar -->
+                <div id="sub-eliminar" class="sub-section">
+                    <form id="form-eliminar" onsubmit="eliminarProducto(event)">
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 13px; display: block; margin-bottom: 4px; font-weight: 600; color: #ef4444;">Código / SKU a Eliminar:</label>
+                            <input type="text" id="del-codigo" required placeholder="Código del producto..." style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                        </div>
+                        <button type="submit" class="action-btn" style="background: #dc2626; width: 100%;">⚠️ Eliminar Producto</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- BLOQUE 9: Modal Flotante de Administración de Departamentos --- -->
+        <div id="modal-departamentos" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1400;">
+            <div style="background: var(--card-bg); width: 450px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);">
+                <div style="background: var(--primary); color: white; padding: 15px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                    <span>🏢 Administrar Departamentos</span>
+                    <button type="button" onclick="cerrarModalDepartamentos()" style="background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer;">✕</button>
+                </div>
+                <div style="padding: 24px;">
+                    <form onsubmit="guardarNuevoDepartamentoModal(event)" style="display: flex; gap: 8px; margin-bottom: 20px;">
+                        <input type="text" id="nuevo-dep-nombre" required placeholder="Nuevo departamento..." style="flex: 1; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                        <button type="submit" class="action-btn" style="background: #16a34a; padding: 9px 14px;">➕ Agregar</button>
+                    </form>
+
+                    <div style="max-height: 220px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; background: var(--table-bg);">
+                        <table style="width: 100%; border-collapse: collapse; margin: 0;">
+                            <tbody id="tabla-admin-departamentos-body"></tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button type="button" onclick="cerrarModalDepartamentos()" style="background: #475569; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- BLOQUE 10: Vista 3 - Gestión de Inventario --- -->
+        <div id="vista-inventario" class="view-section">
+            <div class="card" style="border-top: 4px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
+                    <h3 style="margin: 0; border: none; color: var(--primary);">📦 GESTIÓN DE INVENTARIO</h3>
+                </div>
+            
+                <div id="sub-inv-productos" class="sub-section active" style="display: block;">
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div style="flex: 1; background: var(--table-bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <span style="font-size: 12px; color: var(--primary); font-weight: bold; display: block;">💰 Total Invertido (Costo):</span>
+                            <span id="inv-total-invertido" style="font-size: 22px; font-weight: bold; color: var(--primary);">$0.00</span>
+                        </div>
+                        <div style="flex: 1; background: var(--table-bg); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <span style="font-size: 12px; color: #16a34a; font-weight: bold; display: block;">📦 Productos en Existencia:</span>
+                            <span id="inv-total-existencia" style="font-size: 22px; font-weight: bold; color: #16a34a;">0</span>
+                        </div>
+                    </div>
+            
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; background: var(--table-bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;">
+                        <div style="display: flex; gap: 10px; align-items: center; flex: 1; min-width: 250px;">
+                            <label style="font-size: 13px; font-weight: bold; color: var(--text-label);">Departamento:</label>
+                            <select id="filtro-depto-inventario" onchange="filtrarInventarioPorDepartamento()" style="flex: 1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                                <option value="">-- Todos los Departamentos --</option>
+                            </select>
+                        </div>
+            
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" onclick="irAModificarProductoSeleccionado()" class="action-btn" style="background: #0284c7; padding: 8px 12px; font-size: 13px;">✏️ Modificar</button>
+                            <button type="button" onclick="exportarInventarioCSV()" class="action-btn" style="background: #475569; padding: 8px 12px; font-size: 13px;">📥 Exportar</button>
+                            <button type="button" onclick="abrirOpcionesImpresion()" class="action-btn" style="background: #7c3aed; padding: 8px 12px; font-size: 13px;">🖨️ Imprimir</button>
+                        </div>
+                    </div>
+            
+                    <div style="overflow-x: auto; max-height: 420px; border: 1px solid var(--border-color); border-radius: 6px;">
+                        <table style="width: 100%; border-collapse: collapse; margin: 0;">
+                            <thead>
+                                <tr style="background: var(--table-bg); border-bottom: 2px solid var(--border-color); position: sticky; top: 0; z-index: 10;">
+                                    <th style="padding: 10px; text-align: left;">Código / SKU</th>
+                                    <th style="padding: 10px; text-align: left;">Descripción</th>
+                                    <th style="padding: 10px; text-align: left;">Costo</th>
+                                    <th style="padding: 10px; text-align: left;">Precio Referencia</th>
+                                    <th style="padding: 10px; text-align: center;">Existencia</th>
+                                    <th style="padding: 10px; text-align: center;">Departamento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-inventario-completo">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">Cargando inventario...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- BLOQUE 11: Modales de Administración y Vista de Usuarios --- -->
+        <div id="modal-editar-usuario" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1300;">
+            <div style="background: var(--card-bg); width: 400px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);">
+                <div style="background: #0284c7; color: white; padding: 15px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                    <span>✏️ Editar Usuario</span>
+                    <button onclick="cerrarModalEditar()" style="background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer;">✕</button>
+                </div>
+                <div style="padding: 24px;">
+                    <form id="form-editar-usuario" onsubmit="guardarEdicionUsuario(event)">
+                        <input type="hidden" id="edit-id">
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--text-label);">Nombre de Usuario:</label>
+                            <input type="text" id="edit-user" required style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                        </div>
+                        <div style="margin-bottom: 14px;">
+                            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--text-label);">Nombre Completo / Área:</label>
+                            <input type="text" id="edit-nombre" required style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: var(--text-label);">Nueva Contraseña (Opcional):</label>
+                            <input type="password" id="edit-pass" placeholder="Dejar en blanco para no cambiar" style="width: 100%; padding: 9px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-main);">
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="action-btn" style="flex: 1; background: #0284c7; padding: 10px;">Guardar Cambios</button>
+                            <button type="button" onclick="cerrarModalEditar()" style="background: #475569; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer;">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="vista-admin-usuarios" class="view-section">
+            <div class="card" style="border-top: 4px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
+                    <h3 style="margin: 0; border: none; color: var(--primary);">👥 GESTIÓN DE USUARIOS Y OPERADORES</h3>
+                    <button type="button" onclick="abrirModalRegistroFromMenu()" class="action-btn" style="background: #16a34a; padding: 8px 14px; font-size: 13px;">➕ Nuevo Usuario</button>
+                </div>
+
+                <div style="overflow-x: auto; border: 1px solid var(--border-color); border-radius: 6px;">
+                    <table style="width: 100%; border-collapse: collapse; margin: 0;">
+                        <thead>
+                            <tr style="background: var(--table-bg); border-bottom: 2px solid var(--border-color);">
+                                <th style="padding: 10px; text-align: left;">ID</th>
+                                <th style="padding: 10px; text-align: left;">Usuario</th>
+                                <th style="padding: 10px; text-align: left;">Nombre Completo / Área</th>
+                                <th style="padding: 10px; text-align: center;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-usuarios-admin-body">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Cargando usuarios...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- --- BLOQUE 12: Vinculación del Script de Lógica Principal --- -->
+    <script src="app.js"></script>
+</body>
+</html>
