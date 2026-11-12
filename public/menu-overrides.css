@@ -1,0 +1,196 @@
+/* --- BLOQUE 18: Navegación y submenús, estilos centralizados ---
+   Presentación únicamente: conserva los IDs, clases y handlers actuales.
+   No altera la lógica ni otras vistas del sistema.
+*/
+
+/* Pestañas principales como una barra visual continua */
+#barra-navegacion {
+  gap: 10px;
+  padding: 10px 12px 0;
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+}
+
+#barra-navegacion .nav-btn {
+  position: relative;
+  min-height: 46px;
+  padding: 10px 17px;
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+  transition: background 0.18s ease, border-color 0.18s ease,
+    color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+#barra-navegacion .nav-btn:not(.active):hover {
+  transform: translateY(-1px);
+}
+
+#barra-navegacion .nav-btn.active::after {
+  position: absolute;
+  right: 28%;
+  bottom: -2px;
+  left: 28%;
+  height: 3px;
+  border-radius: 3px;
+  background: currentColor;
+  content: "";
+}
+
+#barra-navegacion .nav-btn:focus-visible,
+.product-submenu .sub-btn:focus-visible,
+.sales-submenu .sales-submenu-btn:focus-visible {
+  outline: 3px solid rgba(15, 123, 217,  0.3);
+  outline-offset: 2px;
+}
+
+/* Color activo semántico por área */
+#barra-navegacion .nav-btn:nth-of-type(1).active {
+  border-color: #e87916;
+  background: #f28c28;
+  color: #fff;
+  box-shadow: 0 4px 11px rgba(232, 121, 22, 0.22);
+}
+
+#barra-navegacion .nav-btn:nth-of-type(2).active {
+  border-color: #0876c9;
+  background: #1684d4;
+  color: #fff;
+  box-shadow: 0 4px 11px rgba(8, 118, 201, 0.22);
+}
+
+#barra-navegacion .nav-btn:nth-of-type(3).active {
+  border-color: #159766;
+  background: #1b9e6d;
+  color: #fff;
+  box-shadow: 0 4px 11px rgba(21, 151, 102, 0.22);
+}
+
+#barra-navegacion .nav-btn:nth-of-type(4).active {
+  border-color: #7954c7;
+  background: #805fc9;
+  color: #fff;
+  box-shadow: 0 4px 11px rgba(121, 84, 199, 0.22);
+}
+
+/* Submenús compactos, alineados y con fondo compartido */
+.sales-submenu,
+.product-submenu {
+  min-height: 52px;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 9px 12px;
+  border-radius: 0 0 12px 12px;
+}
+
+.sales-submenu-label,
+.product-submenu-label {
+  margin-right: 3px;
+  font-size: 11px;
+}
+
+.sales-submenu .sales-submenu-btn,
+.product-submenu .sub-btn {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 11px;
+  border: 1px solid #d0dbe8;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #25364a;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(30, 55, 80, 0.04);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sales-submenu .sales-submenu-btn:hover,
+.sales-submenu .sales-submenu-btn.active,
+.product-submenu .sub-btn:hover {
+  border-color: #8eb6df;
+  background: #fff;
+  color: var(--primary);
+}
+
+/* Reordena solo visualmente: Nuevo, Buscar, Departamentos, Salidas, Importar, Eliminar */
+.product-submenu [data-subproducto="registrar"] { order: 1; }
+.product-submenu [data-subproducto="buscar-actualizar"] { order: 2; }
+.product-submenu [data-subproducto="eliminar"] {
+  order: 6;
+  margin-left: auto;
+  border-color: #e6b2b5;
+  background: #f8eeee;
+  color: #a94d55;
+}
+
+.product-submenu [data-subproducto="eliminar"]:hover {
+  border-color: #d88b91;
+  background: #f5e1e2;
+  color: #963c45;
+}
+
+.product-submenu > button:not([data-subproducto]) { order: 3; }
+.product-submenu > button:nth-of-type(5) { order: 4; }
+.product-submenu > button:nth-of-type(6) { order: 5; }
+
+/* Enlaces activos de Productos conservan el estado sin competir con la pestaña principal */
+.product-submenu [data-subproducto].active {
+  border-color: #a6cdec;
+  background: #edf7ff;
+  color: #075fa3;
+}
+
+/* Contraste correspondiente en modo oscuro */
+body.dark-mode #barra-navegacion .nav-btn:nth-of-type(1).active { background: #a95b1c; }
+body.dark-mode #barra-navegacion .nav-btn:nth-of-type(2).active { background: #176ca9; }
+body.dark-mode #barra-navegacion .nav-btn:nth-of-type(3).active { background: #18764f; }
+body.dark-mode #barra-navegacion .nav-btn:nth-of-type(4).active { background: #6548a2; }
+
+body.dark-mode .sales-submenu .sales-submenu-btn,
+body.dark-mode .product-submenu .sub-btn {
+  border-color: var(--border-color);
+  background: #1e293b;
+  color: #d7e0eb;
+}
+
+body.dark-mode .sales-submenu .sales-submenu-btn:hover,
+body.dark-mode .sales-submenu .sales-submenu-btn.active,
+body.dark-mode .product-submenu [data-subproducto].active {
+  border-color: #4b83b6;
+  background: #26374e;
+  color: #a8d1f3;
+}
+
+body.dark-mode .product-submenu [data-subproducto="eliminar"] {
+  border-color: #70464d;
+  background: #38252a;
+  color: #f2a0a6;
+}
+
+@media (max-width: 760px) {
+  #barra-navegacion {
+    gap: 7px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding: 8px 8px 0;
+  }
+
+  #barra-navegacion .nav-btn {
+    min-height: 42px;
+    flex: 0 0 auto;
+    padding: 8px 11px;
+    font-size: 13px;
+  }
+
+  .sales-submenu,
+  .product-submenu {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .product-submenu [data-subproducto="eliminar"] {
+    margin-left: 0;
+  }
+}
